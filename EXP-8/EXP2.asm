@@ -1,27 +1,18 @@
 section .data
-    array_prompt db 'Enter number of elements: ', 0
-    array_len equ $ - array_prompt
     input_msg db 'Enter element (use - for negative numbers): ', 0
     input_len equ $ - input_msg
     pos_msg db 'Number of positive numbers: ', 0
     pos_len equ $ - pos_msg
     neg_msg db 'Number of negative numbers: ', 0
     neg_len equ $ - neg_msg
-    error_range db 'Error: Number must be between 1 and 1000', 0xA, 0
-    error_range_len equ $ - error_range
     error_input db 'Error: Invalid input, try again', 0xA, 0
     error_input_len equ $ - error_input
     error_overflow db 'Error: Number too large or too small', 0xA, 0
     error_overflow_len equ $ - error_overflow
     newline db 0xA, 0
-    datetime db '2025-03-24 12:27:58', 0xA, 0
-    datetime_len equ $ - datetime
-    username db 'audumber28', 0xA, 0
-    username_len equ $ - username
-
+  
 section .bss
-    array resw 1000
-    num_elements resw 1
+    array resw 5
     pos_count resw 1
     neg_count resw 1
     input_buf resb 16
@@ -31,61 +22,14 @@ section .text
     global _start
 
 _start:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, datetime
-    mov edx, datetime_len
-    int 0x80
-
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, username
-    mov edx, username_len
-    int 0x80
+    
 
     mov word [pos_count], 0
     mov word [neg_count], 0
-
-get_array_size:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, array_prompt
-    mov edx, array_len
-    int 0x80
-    
-    call read_num
-    
-    cmp edx, -1
-    je invalid_array_size
-    
-    cmp eax, 1
-    jl invalid_range
-    cmp eax, 1000
-    jg invalid_range
-    
-    mov [num_elements], ax
-    
     xor esi, esi
-    jmp input_loop
-
-invalid_range:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, error_range
-    mov edx, error_range_len
-    int 0x80
-    jmp get_array_size
-
-invalid_array_size:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, error_input
-    mov edx, error_input_len
-    int 0x80
-    jmp get_array_size
 
 input_loop:
-    cmp si, [num_elements]
+    cmp si, 5
     jge count_display
     
     mov eax, 4
@@ -261,73 +205,6 @@ read_signed_error:
 read_signed_exit:
     mov esp, ebp
     pop ebp
-    ret
-
-read_num:
-    mov eax, 3
-    mov ebx, 0
-    mov ecx, input_buf
-    mov edx, 16
-    int 0x80
-    
-    cmp eax, 1
-    jl read_num_error
-    
-    xor eax, eax
-    mov ecx, input_buf
-    
-    movzx edx, byte [ecx]
-    cmp dl, 0xA
-    je read_num_error
-    cmp dl, 0
-    je read_num_error
-
-convert_loop:
-    movzx edx, byte [ecx]
-    
-    cmp dl, 0xA
-    je done_convert
-    cmp dl, 0
-    je done_convert
-    
-    cmp dl, '0'
-    jl read_num_error
-    cmp dl, '9'
-    jg read_num_error
-    
-    sub dl, '0'
-    
-    cmp eax, 6553
-    jg check_overflow_edge_unsigned
-    
-    imul eax, 10
-    jo read_num_error
-    add eax, edx
-    jo read_num_error
-    
-    inc ecx
-    jmp convert_loop
-
-check_overflow_edge_unsigned:
-    cmp eax, 6553
-    jne read_num_error
-    
-    cmp dl, 5
-    jg read_num_error
-    
-    imul eax, 10
-    add eax, edx
-    
-    inc ecx
-    jmp convert_loop
-
-done_convert:
-    xor edx, edx
-    ret
-
-read_num_error:
-    xor eax, eax
-    mov edx, -1
     ret
 
 print_num:

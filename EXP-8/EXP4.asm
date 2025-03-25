@@ -15,8 +15,7 @@
 %endmacro
 
 section .data
-    size_msg db 'Enter the size of array (1-9): ', 0xA
-    size_len equ $ - size_msg
+   
     msg db 'Enter the elements of the array : ', 0xA
     plen equ $ - msg
     msg1 db 'Count of elements less than 5: '
@@ -29,10 +28,9 @@ section .data
     nlen equ $ - newline
 
 section .bss
-    array resb 100
+    array resb 5
     num resb 10
     temp resb 1
-    size resb 1
     countLess resb 1
     countGreater resb 1
     countEqual resb 1
@@ -41,13 +39,9 @@ section .text
     global _start
 
 _start:
-    print size_msg, size_len
-    read num, 2
-    mov al, [num]
-    sub al, '0'
-    mov [size], al
-
-    movzx ecx, byte[size]
+   
+    
+    mov ecx, 5
     mov esi, 0
     push ecx
     print msg, plen
@@ -89,7 +83,7 @@ store_num:
     pop ecx
     loop input_loop
 
-    movzx ecx, byte[size]
+    mov ecx, 5
     mov esi, 0
     mov byte[countLess], 0
     mov byte[countGreater], 0

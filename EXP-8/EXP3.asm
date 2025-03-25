@@ -82,6 +82,7 @@ store_num:
 
     mov ecx, 5
     mov esi, 0
+
 count_loop:
     mov al, [array + esi]
     cbw
